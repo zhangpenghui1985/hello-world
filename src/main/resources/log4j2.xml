@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<configuration status="WARN" packages="org.apache.logging.log4j.core.pattern">  
+    <properties>  
+        <!-- 文件输出格式，一般不调整 -->  
+        <property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} |-%-5level [%thread] %c [%L] -| %msg%n</property>  
+    </properties>  
+  
+  
+     <!-- 输出日志文件路径和控制台定义-->  
+    <appenders>  
+        <Console name="CONSOLELog" target="system_out">  
+          	      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%c,%M,%L]:      %msg%n"/>    
+        </Console>  
+
+        <RollingFile name="ROLLINGLog" fileName="logs/ta-fina-trans-batch-stdout.log" filePattern="logs/ta-fina-trans-batch-stdout-$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+			<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+	      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%c,%M,%L]:      %msg%n"/>    
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<!-- 配置为SizeBasedTriggeringPolicy4LCPT支持日志文件删除后,自动生成日志文件-->  
+				<SizeBasedTriggeringPolicy4LCPT size="250 MB" />
+			</Policies>
+		</RollingFile>
+        
+        <RollingFile name="ERRLog" fileName="logs/ta-fina-trans-batch-err.log" filePattern="logs/ta-fina-trans-batch-err-$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+			<ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+			      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%c,%M,%L]:      %msg%n"/>    
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+			  <!-- 配置为SizeBasedTriggeringPolicy4LCPT支持日志文件删除后,自动生成日志文件-->  
+				<SizeBasedTriggeringPolicy4LCPT size="250 MB" />
+			</Policies>
+		</RollingFile>
+		
+		<RollingFile name="LCPTLog" fileName="logs/test.log" filePattern="logs/test-$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+			<ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+		      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%c,%M,%L]:      %msg%n"/>    
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<!-- 这里配置为SizeBasedTriggeringPolicy4LCPT支持日志文件删除后,自动生成日志文件-->  
+				<SizeBasedTriggeringPolicy4LCPT size="250 MB" />
+			</Policies>
+		</RollingFile>
+		
+		        <RollingFile name="CHANNELLog" fileName="logs/ta-fina-trans-batch-channel.log" filePattern="logs/ta-fina-trans-batch-channel-$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+			<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+	      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%c,%M,%L]:      %msg%n"/>    
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<!-- 配置为SizeBasedTriggeringPolicy4LCPT支持日志文件删除后,自动生成日志文件-->  
+				<SizeBasedTriggeringPolicy4LCPT size="250 MB" />
+			</Policies>
+		</RollingFile>
+	</appenders>
+
+
+    <!-- 文件输出,日志级别调整，修改以下level属性 -->  
+    <!-- root日志 -->	
+	<loggers>
+		<root level="debug">
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="ROLLINGLog" />
+			<appender-ref ref="ERRLog" />
+		</root>
+		
+	 <!-- spring框架日志 -->	
+		<logger name="org.springframework" level="info" additivity="false">
+			<appender-ref ref="ERRLog" />
+		    <appender-ref ref="ROLLINGLog" />
+			<appender-ref ref="CONSOLELog" />
+		</logger>	
+
+	 <!-- shardingsphere分库分表日志,默认关闭 -->	
+		<logger name="org.apache.shardingsphere" level="off" additivity="false">
+			<appender-ref ref="ERRLog" />
+		    <appender-ref ref="ROLLINGLog" />
+			<appender-ref ref="CONSOLELog" />
+		</logger>	
+		
+	 <!-- 注册中心日志 -->	
+		<logger name="com.netflix" level="off" additivity="false">
+			<appender-ref ref="ERRLog" />
+		    <appender-ref ref="ROLLINGLog" />
+			<appender-ref ref="CONSOLELog" />
+		</logger>			
+		
+		
+		<!-- 通道日志 -->
+		<logger name="lcpt.jsonchannel" level="info" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="ROLLINGLog" />
+			<appender-ref ref="CHANNELLog" />
+		</logger>
+		
+		
+		<!-- 管理台日志 -->
+		<logger name="lcpt.web.console" level="warn" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="ROLLINGLog" />
+		</logger>
+
+		<!-- 业务日志,带缓存 -->
+		<logger name="lcpt.trans.cache" level="debug" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="LCPTLog" />
+		</logger>
+		
+		<!-- 业务日志,不带缓存,包含DB插件SQL日志 -->	
+		<logger name="lcpt.trans.no.cache" level="debug" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="LCPTLog" />
+		</logger>
+		
+		<!-- 基础库日志 -->			
+		<logger name="com.hundsun.jres" level="debug" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="ROLLINGLog" />
+			<appender-ref ref="CONSOLELog" />
+		</logger>
+
+		<logger name="com.hundsun.lcpt" level="debug" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="ROLLINGLog" />
+		</logger>
+
+	    <!-- redis缓存日志 -->	
+		<logger name="lcpt.cache.jedis" level="debug" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="ROLLINGLog" />
+		</logger>
+	
+		<logger name="org.apache.http" level="info" additivity="false">
+			<appender-ref ref="ERRLog" />
+			<appender-ref ref="CONSOLELog" />
+			<appender-ref ref="ROLLINGLog" />
+		</logger>
+	</loggers>
+</configuration>
